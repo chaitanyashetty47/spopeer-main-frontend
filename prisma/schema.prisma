@@ -1,0 +1,157 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+// Use Direct URL from env for Production and 
+// Database URL from env.local for Development
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public"]
+}
+
+model Profile {
+  id               String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name             String?
+  username         String?        @unique
+  bio              String?
+  profilePicture   String?
+  role             Role?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime?      @updatedAt
+  auth_user_id     String ?       @unique @db.Uuid
+  email            String?
+  achievements     Achievement[]
+  comments         Comment[]
+  followers        Connection[]  @relation("FollowerRelation")
+  following        Connection[]  @relation("FollowingRelation")
+  likes            Like[]
+  receivedMessages Message[]     @relation("ReceivedMessages")
+  sentMessages     Message[]     @relation("SentMessages")
+  physicalInfo     PhysicalInfo?
+  posts            Post[]
+  sportInfo        SportInfo?
+  training         Training?
+
+  @@map("profiles")
+  @@schema("public")
+}
+
+model PhysicalInfo {
+  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  profileId String  @unique @db.Uuid
+  height    Float?
+  weight    Float?
+  age       Int?
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  @@map("physical_info")
+  @@schema("public")
+}
+
+model SportInfo {
+  id         String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  profileId  String  @unique @db.Uuid
+  sport      String
+  position   String?
+  experience Int?
+  profile    Profile @relation(fields: [profileId], references: [id])
+
+  @@map("sport_info")
+  @@schema("public")
+}
+
+model Training {
+  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  profileId String  @unique @db.Uuid
+  schedule  String?
+  coach     String?
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  @@map("training")
+  @@schema("public")
+}
+
+model Achievement {
+  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  profileId String  @db.Uuid
+  title     String
+  year      Int?
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  @@map("achievements")
+  @@schema("public")
+}
+
+model Post {
+  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  authorId  String    @db.Uuid
+  content   String?
+  mediaUrl  String?
+  createdAt DateTime  @default(now())
+  comments  Comment[]
+  likes     Like[]
+  author    Profile   @relation(fields: [authorId], references: [id])
+
+  @@map("posts")
+  @@schema("public")
+}
+
+model Comment {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  postId    String   @db.Uuid
+  authorId  String   @db.Uuid
+  content   String
+  createdAt DateTime @default(now())
+  author    Profile  @relation(fields: [authorId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@map("comments")
+  @@schema("public")
+}
+
+model Like {
+  id     String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  postId String  @db.Uuid
+  userId String  @db.Uuid
+  post   Post    @relation(fields: [postId], references: [id])
+  user   Profile @relation(fields: [userId], references: [id])
+
+  @@map("likes")
+  @@schema("public")
+}
+
+model Connection {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  followerId  String   @db.Uuid
+  followingId String   @db.Uuid
+  createdAt   DateTime @default(now())
+  follower    Profile  @relation("FollowerRelation", fields: [followerId], references: [id])
+  following   Profile  @relation("FollowingRelation", fields: [followingId], references: [id])
+
+  @@map("connections")
+  @@schema("public")
+}
+
+model Message {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  senderId   String   @db.Uuid
+  receiverId String   @db.Uuid
+  content    String
+  createdAt  DateTime @default(now())
+  receiver   Profile  @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     Profile  @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@map("messages")
+  @@schema("public")
+}
+
+enum Role {
+  ATHLETE
+  COACH
+  SUPPORTIVE_PROFESSIONAL
+  CLUB
+
+  @@map("roles")
+  @@schema("public")
+}
