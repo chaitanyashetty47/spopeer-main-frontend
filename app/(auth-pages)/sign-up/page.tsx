@@ -26,9 +26,10 @@ export default async function Signup(props: {
           <h1 className="text-2xl font-bold">CONNECT, SHARE AND PLAY</h1>
           <div className="flex justify-center">
             {/* Placeholder for logo - replace src with actual logo path */}
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+            {/* <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
               <span className="text-2xl text-white font-bold">S</span>
-            </div>
+            </div> */}
+            <Image src="/logo.png" alt="Logo" width={50} height={50} />
           </div>
           <h2 className="text-xl">Create an account</h2>
         </div>

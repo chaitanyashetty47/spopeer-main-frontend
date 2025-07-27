@@ -10,143 +10,143 @@ datasource db {
   schemas  = ["public"]
 }
 
-model Profile {
+model profile {
   id               String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name             String?
   username         String?        @unique
   bio              String?
-  profilePicture   String?
-  role             Role?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime?      @updatedAt
+  profile_picture  String?
+  role             role?
+  created_at       DateTime      @default(now())
+  updated_at       DateTime?      @updatedAt
   auth_user_id     String ?       @unique @db.Uuid
-  email            String?
-  achievements     Achievement[]
-  comments         Comment[]
-  followers        Connection[]  @relation("FollowerRelation")
-  following        Connection[]  @relation("FollowingRelation")
-  likes            Like[]
-  receivedMessages Message[]     @relation("ReceivedMessages")
-  sentMessages     Message[]     @relation("SentMessages")
-  physicalInfo     PhysicalInfo?
-  posts            Post[]
-  sportInfo        SportInfo?
-  training         Training?
+  email            String?        @unique
+  achievements     achievement[]
+  comments         comment[]
+  followers        connection[]  @relation("FollowerRelation")
+  following        connection[]  @relation("FollowingRelation")
+  likes            like[]
+  received_messages message[]     @relation("ReceivedMessages")
+  sent_messages     message[]     @relation("SentMessages")
+  physical_info     physical_info?
+  posts            post[]
+  sport_info       sport_info?
+  training         training?
 
   @@map("profiles")
   @@schema("public")
 }
 
-model PhysicalInfo {
-  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  profileId String  @unique @db.Uuid
-  height    Float?
-  weight    Float?
-  age       Int?
-  profile   Profile @relation(fields: [profileId], references: [id])
+model physical_info {
+  id         String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  profile_id String  @unique @db.Uuid
+  height     Float?
+  weight     Float?
+  age        Int?
+  profile    profile @relation(fields: [profile_id], references: [id])
 
   @@map("physical_info")
   @@schema("public")
 }
 
-model SportInfo {
+model sport_info {
   id         String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  profileId  String  @unique @db.Uuid
+  profile_id String  @unique @db.Uuid
   sport      String
   position   String?
   experience Int?
-  profile    Profile @relation(fields: [profileId], references: [id])
+  profile    profile @relation(fields: [profile_id], references: [id])
 
   @@map("sport_info")
   @@schema("public")
 }
 
-model Training {
-  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  profileId String  @unique @db.Uuid
-  schedule  String?
-  coach     String?
-  profile   Profile @relation(fields: [profileId], references: [id])
+model training {
+  id         String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  profile_id String  @unique @db.Uuid
+  schedule   String?
+  coach      String?
+  profile    profile @relation(fields: [profile_id], references: [id])
 
   @@map("training")
   @@schema("public")
 }
 
-model Achievement {
-  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  profileId String  @db.Uuid
-  title     String
-  year      Int?
-  profile   Profile @relation(fields: [profileId], references: [id])
+model achievement {
+  id         String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  profile_id String  @db.Uuid
+  title      String
+  year       Int?
+  profile    profile @relation(fields: [profile_id], references: [id])
 
   @@map("achievements")
   @@schema("public")
 }
 
-model Post {
-  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  authorId  String    @db.Uuid
-  content   String?
-  mediaUrl  String?
-  createdAt DateTime  @default(now())
-  comments  Comment[]
-  likes     Like[]
-  author    Profile   @relation(fields: [authorId], references: [id])
+model post {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  author_id  String    @db.Uuid
+  content    String?
+  media_url  String?
+  created_at DateTime  @default(now())
+  comments   comment[]
+  likes      like[]
+  author     profile   @relation(fields: [author_id], references: [id])
 
   @@map("posts")
   @@schema("public")
 }
 
-model Comment {
-  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  postId    String   @db.Uuid
-  authorId  String   @db.Uuid
-  content   String
-  createdAt DateTime @default(now())
-  author    Profile  @relation(fields: [authorId], references: [id])
-  post      Post     @relation(fields: [postId], references: [id])
+model comment {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  post_id    String   @db.Uuid
+  author_id  String   @db.Uuid
+  content    String
+  created_at DateTime @default(now())
+  author     profile  @relation(fields: [author_id], references: [id])
+  post       post     @relation(fields: [post_id], references: [id])
 
   @@map("comments")
   @@schema("public")
 }
 
-model Like {
-  id     String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  postId String  @db.Uuid
-  userId String  @db.Uuid
-  post   Post    @relation(fields: [postId], references: [id])
-  user   Profile @relation(fields: [userId], references: [id])
+model like {
+  id      String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  post_id String  @db.Uuid
+  user_id String  @db.Uuid
+  post    post    @relation(fields: [post_id], references: [id])
+  user    profile @relation(fields: [user_id], references: [id])
 
   @@map("likes")
   @@schema("public")
 }
 
-model Connection {
-  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  followerId  String   @db.Uuid
-  followingId String   @db.Uuid
-  createdAt   DateTime @default(now())
-  follower    Profile  @relation("FollowerRelation", fields: [followerId], references: [id])
-  following   Profile  @relation("FollowingRelation", fields: [followingId], references: [id])
+model connection {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  follower_id  String   @db.Uuid
+  following_id String   @db.Uuid
+  created_at   DateTime @default(now())
+  follower     profile  @relation("FollowerRelation", fields: [follower_id], references: [id])
+  following    profile  @relation("FollowingRelation", fields: [following_id], references: [id])
 
   @@map("connections")
   @@schema("public")
 }
 
-model Message {
-  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  senderId   String   @db.Uuid
-  receiverId String   @db.Uuid
-  content    String
-  createdAt  DateTime @default(now())
-  receiver   Profile  @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  sender     Profile  @relation("SentMessages", fields: [senderId], references: [id])
+model message {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sender_id   String   @db.Uuid
+  receiver_id String   @db.Uuid
+  content     String
+  created_at  DateTime @default(now())
+  receiver    profile  @relation("ReceivedMessages", fields: [receiver_id], references: [id])
+  sender      profile  @relation("SentMessages", fields: [sender_id], references: [id])
 
   @@map("messages")
   @@schema("public")
 }
 
-enum Role {
+enum role {
   ATHLETE
   COACH
   SUPPORTIVE_PROFESSIONAL

@@ -8,9 +8,9 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 export default function Login() {
   const {user, signInWithEmail, signInWithGoogle, signUpWithEmail} = useAuth();
@@ -41,9 +41,10 @@ export default function Login() {
           <h1 className="text-2xl font-bold">CONNECT, SHARE AND PLAY</h1>
           <div className="flex justify-center">
             {/* Placeholder for logo - replace src with actual logo path */}
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+            {/* <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
               <span className="text-2xl text-white font-bold">S</span>
-            </div>
+            </div> */}
+            <Image src="/logo.png" alt="Logo" width={50} height={50} />
           </div>
           <h2 className="text-xl">Log in to your account</h2>
         </div>

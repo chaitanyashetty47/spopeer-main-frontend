@@ -37,15 +37,50 @@ export const updateSession = async (request: NextRequest) => {
 
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
-    const user = await supabase.auth.getUser();
+    const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
 
-    // protected routes
-    if (request.nextUrl.pathname.startsWith("/protected") && user.error) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+    // If there's an error getting user or no user, handle unauthenticated access
+    if (userError || !authUser) {
+      // Only redirect if trying to access protected routes
+      if (request.nextUrl.pathname.startsWith("/home")) {
+        return NextResponse.redirect(new URL("/sign-in", request.url));
+      }
+      // For other routes, just continue without redirects
+      return response;
     }
 
-    if (request.nextUrl.pathname === "/" && !user.error) {
-      return NextResponse.redirect(new URL("/protected", request.url));
+    // Only fetch profile data if we have a valid user
+    let userRole = null;
+    try {
+      const { data: profiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", authUser.id);
+
+      if (!profileError && profiles && profiles.length > 0) {
+        userRole = profiles[0].role;
+      }
+    } catch (profileError) {
+      // If profile fetch fails, just continue without role
+      console.warn("Failed to fetch user profile:", profileError);
+    }
+
+    console.log("userRole is: ", userRole);
+
+    // Handle authenticated user redirects
+    if (request.nextUrl.pathname === "/") {
+      if (!userRole) {
+        // No role set, redirect to onboarding
+        return NextResponse.redirect(new URL("/onboarding", request.url));
+      } else {
+        // Role exists, redirect to home
+        return NextResponse.redirect(new URL("/home", request.url));
+      }
+    }
+    
+    // Protect home route - redirect to onboarding if no role
+    if (request.nextUrl.pathname.startsWith("/home") && !userRole) {
+      return NextResponse.redirect(new URL("/onboarding", request.url));
     }
 
     return response;
